@@ -1,0 +1,304 @@
+# 📋 API de Estoque de Tecnologia — Apresentação dos Requisitos
+
+Documento de referência para apresentação do trabalho, listando cada requisito, o arquivo onde foi implementado e o trecho de código correspondente.
+
+---
+
+## A. Rota POST `/logar` — Autenticação com JWT
+
+**Descrição:** Recebe `email` e `senha` e retorna um token válido para acessar as demais rotas protegidas.
+
+📁 **Rota declarada em:** `src/routes/authRoutes.js`
+```js
+router.post('/logar', authController.logar);
+```
+
+📁 **Lógica implementada em:** `src/controllers/authController.js`
+```js
+exports.logar = (req, res) => {
+  const { email, senha } = req.body;
+  const usuario = usuarios.find(u => u.email === email && u.senha === senha);
+
+  if (usuario) {
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email },
+      authConfig.secret,
+      { expiresIn: authConfig.expiresIn }
+    );
+    return res.json({ mensagem: 'Login realizado com sucesso', token });
+  }
+
+  return res.status(401).json({ mensagem: 'Credenciais inválidas' });
+};
+```
+
+---
+
+## B. Rota GET — Listar Todos os Itens
+
+**Descrição:** Retorna a lista completa de itens do estoque. Requer token JWT.
+
+📁 **Arquivo:** `src/routes/estoqueRoutes.js`
+```js
+router.get('/estoque', authMiddleware, estoqueController.listarUnidades);
+```
+
+📁 **Arquivo:** `src/controllers/estoqueController.js`
+```js
+exports.listarUnidades = (req, res) => {
+  res.json(estoque);
+};
+```
+
+---
+
+## C. Rota POST — Inserir Novo Item
+
+**Descrição:** Recebe os dados de um novo produto no corpo da requisição e o adiciona ao array de estoque em memória.
+
+📁 **Arquivo:** `src/routes/estoqueRoutes.js`
+```js
+router.post('/estoque', authMiddleware, estoqueController.inserirItem);
+```
+
+📁 **Arquivo:** `src/controllers/estoqueController.js`
+```js
+exports.inserirItem = (req, res) => {
+  const { codigo, nome, preco, quantidade } = req.body;
+  const novoItem = { id: estoque.length + 1, codigo, nome, preco, quantidade };
+  estoque.push(novoItem);
+  res.status(201).json({ mensagem: 'Item inserido com sucesso', item: novoItem });
+};
+```
+
+---
+
+## D. Rota DELETE — Excluir um Item
+
+**Descrição:** Remove um item do estoque com base no `:id` informado na URL.
+
+📁 **Arquivo:** `src/routes/estoqueRoutes.js`
+```js
+router.delete('/estoque/:id', authMiddleware, estoqueController.excluirItem);
+```
+
+📁 **Arquivo:** `src/controllers/estoqueController.js`
+```js
+exports.excluirItem = (req, res) => {
+  const { id } = req.params;
+  const index = estoque.findIndex(item => item.id === parseInt(id));
+  if (index !== -1) {
+    estoque.splice(index, 1);
+    return res.json({ mensagem: 'Item excluído com sucesso' });
+  }
+  res.status(404).json({ mensagem: 'Item não encontrado' });
+};
+```
+
+---
+
+## F. Rota GET — Pesquisar Item pelo Código
+
+**Descrição:** Busca um único item pelo campo `codigo` único (ex: `TEC-001`) informado na URL.
+
+📁 **Arquivo:** `src/routes/estoqueRoutes.js`
+```js
+router.get('/estoque/buscar/:codigo', authMiddleware, estoqueController.buscarPorCodigo);
+```
+
+📁 **Arquivo:** `src/controllers/estoqueController.js`
+```js
+exports.buscarPorCodigo = (req, res) => {
+  const { codigo } = req.params;
+  const item = estoque.find(item => item.codigo === codigo);
+  if (item) {
+    return res.json(item);
+  }
+  res.status(404).json({ mensagem: 'Item não encontrado pelo código informado' });
+};
+```
+
+---
+
+## D². Middleware — Acesso Apenas de Segunda à Sexta
+
+**Descrição:** Middleware global que bloqueia qualquer requisição feita em Sábado ou Domingo, retornando `403 Forbidden`.
+
+📁 **Arquivo:** `src/middlewares/diaSemanaMiddleware.js`
+```js
+module.exports = (req, res, next) => {
+  const diaSemana = new Date().getDay(); // 0 = Domingo, 6 = Sábado
+
+  if (diaSemana === 0 || diaSemana === 6) {
+    return res.status(403).json({
+      mensagem: "Acesso negado. A API está disponível apenas de segunda à sexta-feira."
+    });
+  }
+
+  next();
+};
+```
+
+📁 **Registrado globalmente em:** `index.js`
+```js
+app.use(diaSemanaMiddleware);
+```
+
+---
+
+## E. Middleware — Registro de Horário e Rota
+
+**Descrição:** Middleware global que salva automaticamente em memória o horário, a rota e o método de cada requisição recebida pela API.
+
+📁 **Arquivo:** `src/middlewares/logMiddleware.js`
+```js
+module.exports = (req, res, next) => {
+  const log = {
+    rota: req.originalUrl,
+    metodo: req.method,
+    horario: new Date().toISOString()
+  };
+
+  logs.push(log);
+  next();
+};
+```
+
+📁 **Registrado globalmente em:** `index.js`
+```js
+app.use(logMiddleware);
+```
+
+---
+
+## F². Rota GET — Logs por Data
+
+**Descrição:** Retorna os registros de acesso armazenados em memória. Aceita um parâmetro `?data=YYYY-MM-DD` para filtrar por dia específico.
+
+**Exemplo de uso:** `GET /logs?data=2026-03-18`
+
+📁 **Arquivo:** `src/routes/logRoutes.js`
+```js
+router.get('/logs', authMiddleware, logController.listarLogsPorData);
+```
+
+📁 **Arquivo:** `src/controllers/logController.js`
+```js
+exports.listarLogsPorData = (req, res) => {
+  const { data } = req.query;
+
+  if (!data) {
+    return res.json(logs);
+  }
+
+  const logsFiltrados = logs.filter(log => log.horario.startsWith(data));
+  res.json(logsFiltrados);
+};
+```
+
+---
+
+## G. Rota GET — Download de Relatório PDF
+
+**Descrição:** Gera dinamicamente um arquivo PDF formatado com a lista de itens do estoque e força o download no cliente.
+
+📁 **Arquivo:** `src/routes/relatorioRoutes.js`
+```js
+router.get('/estoque/relatorio', authMiddleware, relatorioController.gerarRelatorioPDF);
+```
+
+📁 **Arquivo:** `src/controllers/relatorioController.js`
+```js
+exports.gerarRelatorioPDF = (req, res) => {
+  const doc = new PDFDocument();
+  const filename = `relatorio-estoque-${Date.now()}.pdf`;
+
+  res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-type', 'application/pdf');
+
+  doc.pipe(res);
+
+  doc.fontSize(20).text('Relatório de Estoque - Loja de Tecnologia', { align: 'center' });
+  doc.moveDown();
+
+  estoque.forEach(item => {
+    doc.fontSize(12).text(`- [${item.codigo}] ${item.nome}`);
+    doc.fontSize(10).text(`  Preço: R$ ${item.preco.toFixed(2)} | Qtd: ${item.quantidade}`);
+    doc.moveDown(0.5);
+  });
+
+  doc.end();
+};
+```
+
+---
+
+## H. Dados Mockados no Código
+
+**Descrição:** Todos os dados (usuários e itens de estoque) estão definidos como arrays em memória, sem nenhum banco de dados externo.
+
+📁 **Arquivo:** `src/data/db.js`
+```js
+const usuarios = [
+  { id: 1, email: 'admin@loja.com', senha: '123' }
+];
+
+const estoque = [
+  { id: 1, codigo: 'TEC-001', nome: 'Notebook Dell Inspiron', preco: 3500, quantidade: 10 },
+  { id: 2, codigo: 'TEC-002', nome: 'Mouse Sem Fio Logitech', preco: 150, quantidade: 45 },
+  { id: 3, codigo: 'TEC-003', nome: 'Teclado Mecânico Redragon', preco: 250, quantidade: 20 },
+  { id: 4, codigo: 'TEC-004', nome: 'Monitor LG 24 polegadas', preco: 800, quantidade: 15 },
+  { id: 5, codigo: 'TEC-005', nome: 'Placa de Vídeo RTX 3060', preco: 2200, quantidade: 5 }
+];
+
+const logs = [];
+```
+
+---
+
+## I. Versionamento no GitHub
+
+**Descrição:** O código está versionado utilizando Git. O repositório contém o histórico completo dos commits realizados durante o desenvolvimento.
+
+📁 **Evidência:** Pasta `.git` presente na raiz do projeto. Use os comandos abaixo para garantir que o código está atualizado no GitHub:
+
+```bash
+git add .
+git commit -m "feat: API de estoque completa"
+git push origin main
+```
+
+---
+
+## J. Aplicação em Nuvem (Vercel)
+
+**Descrição:** A aplicação está configurada para deploy na plataforma **Vercel**, utilizando o arquivo `vercel.json` na raiz do projeto.
+
+📁 **Arquivo:** `vercel.json`
+```json
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ]
+}
+```
+
+**Passos para subir na Vercel:**
+1. Acesse [vercel.com](https://vercel.com) e faça login com o GitHub.
+2. Clique em **"New Project"** e importe o repositório `web2-api-estoque`.
+3. Clique em **"Deploy"** — a Vercel detecta o `vercel.json` automaticamente.
+4. Após o deploy, você receberá uma URL pública (ex: `https://web2-api-estoque.vercel.app`).
+
+---
+
+*Documento gerado para apresentação acadêmica do trabalho de Web 2 — API de Estoque de Tecnologia.*

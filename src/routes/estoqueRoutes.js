@@ -4,7 +4,16 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
-// GET /estoque
+// GET /estoque - Listar todos
 router.get('/estoque', authMiddleware, estoqueController.listarUnidades);
+
+// POST /estoque - Inserir item
+router.post('/estoque', authMiddleware, estoqueController.inserirItem);
+
+// DELETE /estoque/:id - Excluir item
+router.delete('/estoque/:id', authMiddleware, estoqueController.excluirItem);
+
+// GET /estoque/buscar/:codigo - Buscar por código
+router.get('/estoque/buscar/:codigo', authMiddleware, estoqueController.buscarPorCodigo);
 
 module.exports = router;
