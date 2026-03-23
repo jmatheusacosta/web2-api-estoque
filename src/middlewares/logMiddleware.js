@@ -1,14 +1,19 @@
-const { logs } = require('../data/db');
+const { db } = require('../data/db');
+const { logs } = db;
 
 module.exports = (req, res, next) => {
+  const agora = new Date();
+  
   const log = {
     rota: req.originalUrl,
     metodo: req.method,
-    horario: new Date().toISOString()
+    // Armazena ISO para padrão, mas adicionamos a data local para filtro fácil
+    horario: agora.toISOString(), 
+    dataLocal: agora.toLocaleDateString('en-CA') // Retorna YYYY-MM-DD no fuso local
   };
 
   logs.push(log);
-  console.log(`[LOG] ${log.horario} - ${log.metodo} ${log.rota}`);
+  console.log(`[LOG] ${agora.toLocaleString('pt-BR')} - ${log.metodo} ${log.rota}`);
   
   next();
 };

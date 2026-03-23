@@ -1,5 +1,6 @@
 const PDFDocument = require('pdfkit');
-const { estoque } = require('../data/db');
+const { db } = require('../data/db');
+const { estoque } = db;
 
 exports.gerarRelatorioPDF = (req, res) => {
   const doc = new PDFDocument();

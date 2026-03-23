@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const authConfig = require('../config/auth');
-const { usuarios } = require('../data/db');
+const { db } = require('../data/db');
+const { usuarios } = db;
 
 exports.logar = (req, res) => {
   const { email, senha } = req.body;

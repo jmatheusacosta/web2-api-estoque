@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockTech API Interface</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <h1>StockTech <span>API Test Explorer</span></h1>
+            <p>Console de Testes e Documentação da API de Estoque</p>
+            <button id="reset-db-btn" class="danger-btn">Resetar Banco de Dados</button>
+        </header>
+
+        <main class="api-tester">
+            <div class="test-panel">
+                <div class="panel-header">
+                    <h3>Requisição</h3>
+                    <div class="method-selector">
+                        <select id="method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                        <input type="text" id="endpoint" placeholder="/estoque">
+                    </div>
+                </div>
+                <div class="editor-area">
+                    <label>Token (Bearer):</label>
+                    <input type="text" id="token" placeholder="Insira o seu JWT token">
+                    <label>JSON Body (para POST):</label>
+                    <textarea id="request-body" placeholder='{"codigo": "TEC-XXX", "nome": "Item", "preco": 0, "quantidade": 0}'></textarea>
+                </div>
+                <button id="send-btn" class="glow-on-hover">Executar Requisição</button>
+            </div>
+
+            <div class="result-panel">
+                <div class="panel-header">
+                    <h3>Resposta</h3>
+                    <span id="status-code">200 OK</span>
+                </div>
+                <pre id="response-output">{ "mensagem": "Aguardando requisição..." }</pre>
+            </div>
+        </main>
+
+        <section class="docs-section">
+            <h2>Documentação de Rotas</h2>
+            <div class="docs-grid">
+                <div class="doc-card">
+                    <span class="badge post">POST</span>
+                    <h4>/logar</h4>
+                    <p>Obtem o token de acesso.</p>
+                    <code id="code-logar">{"email": "admin@loja.com", "senha": "123"}</code>
+                    <button class="fill-btn" onclick="fillForm('POST', '/logar', 'code-logar')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge get">GET</span>
+                    <h4>/estoque</h4>
+                    <p>Lista todos os itens em estoque.</p>
+                    <button class="fill-btn" onclick="fillForm('GET', '/estoque')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge post">POST</span>
+                    <h4>/estoque</h4>
+                    <p>Cria um item de teste.</p>
+                    <code id="code-estoque-post">{"codigo": "TEC-999", "nome": "Smartphone Gamer", "preco": 4500, "quantidade": 5}</code>
+                    <button class="fill-btn" onclick="fillForm('POST', '/estoque', 'code-estoque-post')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge get">GET</span>
+                    <h4>/estoque/buscar/:codigo</h4>
+                    <p>Busca o item de teste.</p>
+                    <button class="fill-btn" onclick="fillForm('GET', '/estoque/buscar/TEC-999')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge delete">DELETE</span>
+                    <h4>/estoque/:id</h4>
+                    <p>Remove um item pelo ID.</p>
+                    <button class="fill-btn" onclick="fillForm('DELETE', '/estoque/6')">Preencher (ID 6)</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge get">GET</span>
+                    <h4>/estoque/relatorio</h4>
+                    <p>Gera download do PDF.</p>
+                    <button class="fill-btn" onclick="fillForm('GET', '/estoque/relatorio')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge get">GET</span>
+                    <h4>/logs</h4>
+                    <p>Consulta de logs.</p>
+                    <div class="logs-btns">
+                        <button class="fill-btn" onclick="fillForm('GET', '/logs')">Todos os Logs</button>
+                        <button class="fill-btn secondary" onclick="fillTodayLogs()">Logs de Hoje</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

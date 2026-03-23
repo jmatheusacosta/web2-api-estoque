@@ -1,4 +1,5 @@
-const { estoque } = require('../data/db');
+const { db } = require('../data/db');
+const { estoque } = db;
 
 exports.listarUnidades = (req, res) => {
   res.json(estoque);
@@ -6,7 +7,11 @@ exports.listarUnidades = (req, res) => {
 
 exports.inserirItem = (req, res) => {
   const { codigo, nome, preco, quantidade } = req.body;
-  const novoItem = { id: estoque.length + 1, codigo, nome, preco, quantidade };
+  
+  // Encontra o maior ID atual para evitar duplicatas após exclusões
+  const maxId = estoque.length > 0 ? Math.max(...estoque.map(item => item.id)) : 0;
+  const novoItem = { id: maxId + 1, codigo, nome, preco, quantidade };
+  
   estoque.push(novoItem);
   res.status(201).json({ mensagem: 'Item inserido com sucesso', item: novoItem });
 };
