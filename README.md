@@ -265,6 +265,6 @@ const logs = [];
 
 ## J. Aplicação em Nuvem (VPS)
 
-**Descrição:**A aplicação está disponível em nuvem por meio de uma hospedagem via VPS.
+**Descrição:** A aplicação está disponível em nuvem por meio de uma hospedagem via VPS.
 
 
