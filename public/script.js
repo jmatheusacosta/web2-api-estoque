@@ -22,17 +22,7 @@ window.fillTodayLogs = () => {
     window.fillForm('GET', `/logs?data=${today}`);
 };
 
-// Resetar banco de dados
-resetBtn.addEventListener('click', async () => {
-    if (!confirm('Deseja realmente resetar o banco de dados?')) return;
-    try {
-        const response = await fetch('/reset', { method: 'POST' });
-        const data = await response.json();
-        alert(data.mensagem);
-    } catch (error) {
-        alert('Erro ao resetar banco: ' + error.message);
-    }
-});
+
 
 sendBtn.addEventListener('click', async () => {
     const method = document.getElementById('method').value;
@@ -60,10 +50,10 @@ sendBtn.addEventListener('click', async () => {
         }
 
         const response = await fetch(endpoint, options);
-        
+
         // Verifica se é um PDF
         const contentType = response.headers.get('Content-Type');
-        
+
         if (contentType && contentType.includes('application/pdf')) {
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -73,7 +63,7 @@ sendBtn.addEventListener('click', async () => {
             document.body.appendChild(a);
             a.click();
             a.remove();
-            
+
             statusCode.textContent = `${response.status} OK (PDF Baixado)`;
             statusCode.style.background = "#22c55e";
             responseOutput.textContent = '{ "mensagem": "Arquivo PDF gerado e baixado com sucesso." }';
@@ -81,6 +71,10 @@ sendBtn.addEventListener('click', async () => {
         }
 
         const data = await response.json();
+
+        if (endpoint === '/logar' && data.token) {
+            document.getElementById('token').value = data.token;
+        }
 
         // Atualiza status
         statusCode.textContent = `${response.status} ${response.statusText}`;

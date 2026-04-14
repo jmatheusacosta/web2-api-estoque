@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const authRoutes = require('./src/routes/authRoutes');
 const estoqueRoutes = require('./src/routes/estoqueRoutes');
 const logRoutes = require('./src/routes/logRoutes');
@@ -7,6 +8,8 @@ const diaSemanaMiddleware = require('./src/middlewares/diaSemanaMiddleware');
 const logMiddleware = require('./src/middlewares/logMiddleware');
 
 const app = express();
+
+app.use(cors());
 
 // Middleware para interpretar JSON no body das requisições
 app.use(express.json());
@@ -29,13 +32,7 @@ app.use(estoqueRoutes);
 app.use(logRoutes);           // Requisito F (Consulta de logs)
 app.use(relatorioRoutes);     // Requisito G (Download PDF)
 
-const { resetDB } = require('./src/data/db');
 
-// Rota para resetar o banco de dados (Requisito extra)
-app.post('/reset', (req, res) => {
-  resetDB();
-  res.json({ mensagem: 'Banco de dados resetado com sucesso!' });
-});
 
 const PORT = 3000;
 app.listen(PORT, () => {

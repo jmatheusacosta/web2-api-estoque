@@ -135,3 +135,6 @@ dist
 # Editor
 .vscode/
 .idea/
+
+# Firebase
+serviceAccountKey.json

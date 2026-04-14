@@ -4,10 +4,13 @@
   "description": "API de estoque para loja de informática",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed": "node scripts/seed.js"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^4.18.2",
+    "firebase-admin": "^13.8.0",
     "jsonwebtoken": "^9.0.0",
     "pdfkit": "^0.18.0"
   }

@@ -1,19 +1,18 @@
-const { db } = require('../data/db');
-const { logs } = db;
+const { db } = require('../config/firebase');
 
 module.exports = (req, res, next) => {
-  const agora = new Date();
-  
   const log = {
     rota: req.originalUrl,
     metodo: req.method,
-    // Armazena ISO para padrão, mas adicionamos a data local para filtro fácil
-    horario: agora.toISOString(), 
-    dataLocal: agora.toLocaleDateString('en-CA') // Retorna YYYY-MM-DD no fuso local
+    horario: new Date().toISOString()
   };
 
-  logs.push(log);
-  console.log(`[LOG] ${agora.toLocaleString('pt-BR')} - ${log.metodo} ${log.rota}`);
+  console.log(`[LOG] ${log.horario} - ${log.metodo} ${log.rota}`);
+  
+  // Salva no banco em background sem bloquear a requisição
+  db.collection('logs').add(log).catch(err => {
+    console.error("Erro interno ao salvar log no Firestore:", err.message);
+  });
   
   next();
 };

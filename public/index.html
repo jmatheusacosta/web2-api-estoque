@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +10,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="glass-container">
         <header>
             <h1>StockTech <span>API Test Explorer</span></h1>
             <p>Console de Testes e Documentação da API de Estoque</p>
-            <button id="reset-db-btn" class="danger-btn">Resetar Banco de Dados</button>
         </header>
 
         <main class="api-tester">
@@ -34,7 +35,8 @@
                     <label>Token (Bearer):</label>
                     <input type="text" id="token" placeholder="Insira o seu JWT token">
                     <label>JSON Body (para POST):</label>
-                    <textarea id="request-body" placeholder='{"codigo": "TEC-XXX", "nome": "Item", "preco": 0, "quantidade": 0}'></textarea>
+                    <textarea id="request-body"
+                        placeholder='{"codigo": "TEC-XXX", "nome": "Item", "preco": 0, "quantidade": 0}'></textarea>
                 </div>
                 <button id="send-btn" class="glow-on-hover">Executar Requisição</button>
             </div>
@@ -68,8 +70,10 @@
                     <span class="badge post">POST</span>
                     <h4>/estoque</h4>
                     <p>Cria um item de teste.</p>
-                    <code id="code-estoque-post">{"codigo": "TEC-999", "nome": "Smartphone Gamer", "preco": 4500, "quantidade": 5}</code>
-                    <button class="fill-btn" onclick="fillForm('POST', '/estoque', 'code-estoque-post')">Preencher</button>
+                    <code
+                        id="code-estoque-post">{"codigo": "TEC-999", "nome": "Smartphone Gamer", "preco": 4500, "quantidade": 5}</code>
+                    <button class="fill-btn"
+                        onclick="fillForm('POST', '/estoque', 'code-estoque-post')">Preencher</button>
                 </div>
                 <div class="doc-card">
                     <span class="badge get">GET</span>
@@ -104,4 +108,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

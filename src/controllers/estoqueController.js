@@ -1,36 +1,52 @@
-const { db } = require('../data/db');
-const { estoque } = db;
+const { db } = require('../config/firebase');
 
-exports.listarUnidades = (req, res) => {
-  res.json(estoque);
+exports.listarUnidades = async (req, res) => {
+  try {
+    const snapshot = await db.collection('estoque').get();
+    const estoque = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(estoque);
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro ao listar estoque', erro: error.message });
+  }
 };
 
-exports.inserirItem = (req, res) => {
+exports.inserirItem = async (req, res) => {
   const { codigo, nome, preco, quantidade } = req.body;
-  
-  // Encontra o maior ID atual para evitar duplicatas após exclusões
-  const maxId = estoque.length > 0 ? Math.max(...estoque.map(item => item.id)) : 0;
-  const novoItem = { id: maxId + 1, codigo, nome, preco, quantidade };
-  
-  estoque.push(novoItem);
-  res.status(201).json({ mensagem: 'Item inserido com sucesso', item: novoItem });
+  try {
+    const novoItemRef = db.collection('estoque').doc();
+    const novoItem = { codigo, nome, preco, quantidade };
+    await novoItemRef.set(novoItem);
+    res.status(201).json({ mensagem: 'Item inserido com sucesso', item: { id: novoItemRef.id, ...novoItem } });
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro ao inserir item', erro: error.message });
+  }
 };
 
-exports.excluirItem = (req, res) => {
+exports.excluirItem = async (req, res) => {
   const { id } = req.params;
-  const index = estoque.findIndex(item => item.id === parseInt(id));
-  if (index !== -1) {
-    estoque.splice(index, 1);
-    return res.json({ mensagem: 'Item excluído com sucesso' });
+  try {
+    const itemRef = db.collection('estoque').doc(id);
+    const doc = await itemRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ mensagem: 'Item não encontrado' });
+    }
+    await itemRef.delete();
+    res.json({ mensagem: 'Item excluído com sucesso' });
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro ao excluir item', erro: error.message });
   }
-  res.status(404).json({ mensagem: 'Item não encontrado' });
 };
 
-exports.buscarPorCodigo = (req, res) => {
+exports.buscarPorCodigo = async (req, res) => {
   const { codigo } = req.params;
-  const item = estoque.find(item => item.codigo === codigo);
-  if (item) {
-    return res.json(item);
+  try {
+    const snapshot = await db.collection('estoque').where('codigo', '==', codigo).get();
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return res.json({ id: doc.id, ...doc.data() });
+    }
+    res.status(404).json({ mensagem: 'Item não encontrado pelo código informado' });
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro ao buscar item', erro: error.message });
   }
-  res.status(404).json({ mensagem: 'Item não encontrado pelo código informado' });
 };
