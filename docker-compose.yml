@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  web2-api-estoque:
+    build: .
+    container_name: web2-api-estoque
+    restart: always
+    ports:
+      - "3252:3252"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

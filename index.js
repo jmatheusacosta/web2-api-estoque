@@ -34,7 +34,7 @@ app.use(relatorioRoutes);     // Requisito G (Download PDF)
 
 
 
-const PORT = 3000;
+const PORT = 3252;
 app.listen(PORT, () => {
   console.log(`API rodando na porta ${PORT}`);
 });
