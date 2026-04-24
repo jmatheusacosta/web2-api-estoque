@@ -50,3 +50,26 @@ exports.buscarPorCodigo = async (req, res) => {
     res.status(500).json({ mensagem: 'Erro ao buscar item', erro: error.message });
   }
 };
+
+exports.atualizarItem = async (req, res) => {
+  const { id } = req.params;
+  const { codigo, nome, preco, quantidade } = req.body;
+  try {
+    const itemRef = db.collection('estoque').doc(id);
+    const doc = await itemRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ mensagem: 'Item não encontrado' });
+    }
+    
+    const dadosAtualizados = {};
+    if (codigo !== undefined) dadosAtualizados.codigo = codigo;
+    if (nome !== undefined) dadosAtualizados.nome = nome;
+    if (preco !== undefined) dadosAtualizados.preco = preco;
+    if (quantidade !== undefined) dadosAtualizados.quantidade = quantidade;
+
+    await itemRef.update(dadosAtualizados);
+    res.json({ mensagem: 'Item atualizado com sucesso', item: { id, ...doc.data(), ...dadosAtualizados } });
+  } catch (error) {
+    res.status(500).json({ mensagem: 'Erro ao atualizar item', erro: error.message });
+  }
+};

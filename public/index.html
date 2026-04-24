@@ -26,6 +26,7 @@
                         <select id="method">
                             <option value="GET">GET</option>
                             <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
                             <option value="DELETE">DELETE</option>
                         </select>
                         <input type="text" id="endpoint" placeholder="/estoque">
@@ -83,6 +84,13 @@
                     <h4>/estoque/buscar/:codigo</h4>
                     <p>Busca o item de teste.</p>
                     <button class="fill-btn" onclick="fillForm('GET', '/estoque/buscar/TEC-999')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge post">PUT</span>
+                    <h4>/estoque/:id</h4>
+                    <p>Atualiza o item.</p>
+                    <code id="code-estoque-put">{"nome": "Item Atualizado", "preco": 100}</code>
+                    <button class="fill-btn" onclick="fillForm('PUT', '/estoque/ID_DO_ITEM', 'code-estoque-put')">Preencher</button>
                 </div>
                 <div class="doc-card">
                     <span class="badge delete">DELETE</span>

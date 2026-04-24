@@ -35,10 +35,12 @@ app.use(logRoutes);           // Requisito F (Consulta de logs)
 app.use(relatorioRoutes);     // Requisito G (Download PDF)
 app.use(uploadRoutes);
 
+const PORT = process.env.PORT || 3252;
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`API rodando na porta ${PORT}`);
+  });
+}
 
-
-const PORT = 3252;
-app.listen(PORT, () => {
-  console.log(`API rodando na porta ${PORT}`);
-});
+module.exports = app;
 

@@ -16,4 +16,7 @@ router.delete('/estoque/:id', authMiddleware, estoqueController.excluirItem);
 // GET /estoque/buscar/:codigo - Buscar por código
 router.get('/estoque/buscar/:codigo', authMiddleware, estoqueController.buscarPorCodigo);
 
+// PUT /estoque/:id - Atualizar item
+router.put('/estoque/:id', authMiddleware, estoqueController.atualizarItem);
+
 module.exports = router;
