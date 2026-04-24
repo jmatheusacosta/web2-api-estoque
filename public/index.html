@@ -34,9 +34,12 @@
                 <div class="editor-area">
                     <label>Token (Bearer):</label>
                     <input type="text" id="token" placeholder="Insira o seu JWT token">
-                    <label>JSON Body (para POST):</label>
+                    <label>JSON Body (para POST comum):</label>
                     <textarea id="request-body"
                         placeholder='{"codigo": "TEC-XXX", "nome": "Item", "preco": 0, "quantidade": 0}'></textarea>
+                    
+                    <label>Upload de Arquivo (para POST /upload):</label>
+                    <input type="file" id="image-upload" accept="image/*" class="file-input">
                 </div>
                 <button id="send-btn" class="glow-on-hover">Executar Requisição</button>
             </div>
@@ -101,6 +104,12 @@
                         <button class="fill-btn" onclick="fillForm('GET', '/logs')">Todos os Logs</button>
                         <button class="fill-btn secondary" onclick="fillTodayLogs()">Logs de Hoje</button>
                     </div>
+                </div>
+                <div class="doc-card">
+                    <span class="badge post">POST</span>
+                    <h4>/upload</h4>
+                    <p>Envia uma imagem para a Nuvem B2.</p>
+                    <button class="fill-btn" onclick="fillForm('POST', '/upload')">Preencher</button>
                 </div>
             </div>
         </section>

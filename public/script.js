@@ -13,6 +13,7 @@ window.fillForm = (method, endpoint, bodyId = null) => {
     } else {
         document.getElementById('request-body').value = '';
     }
+    document.getElementById('image-upload').value = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -29,6 +30,7 @@ sendBtn.addEventListener('click', async () => {
     const endpoint = document.getElementById('endpoint').value;
     const token = document.getElementById('token').value;
     const bodyText = document.getElementById('request-body').value;
+    const imageUpload = document.getElementById('image-upload');
 
     responseOutput.textContent = "Carregando...";
     statusCode.textContent = "PROCESSANDO...";
@@ -44,9 +46,17 @@ sendBtn.addEventListener('click', async () => {
             options.headers['Authorization'] = `Bearer ${token}`;
         }
 
-        if (method !== 'GET' && bodyText) {
+        if (method !== 'GET' && bodyText && endpoint !== '/upload') {
             options.headers['Content-Type'] = 'application/json';
             options.body = bodyText;
+        }
+
+        // Se for rota de upload e houver arquivo selecionado
+        if (method === 'POST' && endpoint === '/upload' && imageUpload.files.length > 0) {
+            const formData = new FormData();
+            formData.append('imagem', imageUpload.files[0]);
+            options.body = formData;
+            // O fetch cuida de setar o Content-Type como multipart/form-data e definir o boundary.
         }
 
         const response = await fetch(endpoint, options);

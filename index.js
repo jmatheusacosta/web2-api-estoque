@@ -1,9 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./src/routes/authRoutes');
 const estoqueRoutes = require('./src/routes/estoqueRoutes');
 const logRoutes = require('./src/routes/logRoutes');
 const relatorioRoutes = require('./src/routes/relatorioRoutes');
+const uploadRoutes = require('./src/routes/uploadRoutes');
 const diaSemanaMiddleware = require('./src/middlewares/diaSemanaMiddleware');
 const logMiddleware = require('./src/middlewares/logMiddleware');
 
@@ -31,6 +33,7 @@ app.use(authRoutes);
 app.use(estoqueRoutes);
 app.use(logRoutes);           // Requisito F (Consulta de logs)
 app.use(relatorioRoutes);     // Requisito G (Download PDF)
+app.use(uploadRoutes);
 
 
 
