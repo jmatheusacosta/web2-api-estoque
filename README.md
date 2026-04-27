@@ -1,4 +1,4 @@
-# 📋 API de Estoque de Tecnologia — Apresentação dos Requisitos
+# 📋 API de Estoque de Tecnologia — Apresentação dos Requisitos - N1A
 
 Documento de referência para apresentação do trabalho, listando cada requisito, o arquivo onde foi implementado e o trecho de código correspondente.
 
@@ -268,3 +268,103 @@ const logs = [];
 **Descrição:** A aplicação está disponível em nuvem por meio de uma hospedagem via VPS.
 
 
+# 📋 Apresentação dos Requisitos - N1B
+
+## A. Armazenar os dados com banco de dados em nuvem (NoSQL)
+
+**Descrição:** A aplicação persiste seus dados (estoque e usuários) utilizando o banco de dados em nuvem **Firebase Firestore** (plataforma NoSQL, semelhante ao MongoDB).
+
+📁 **Arquivo de configuração:** `src/config/firebase.js`
+📁 **Script de inicialização:** `scripts/seed.js`
+
+---
+
+## B. Salvar imagem em nuvem
+
+**Descrição:** Implementação de upload de arquivos de imagem (`multipart/form-data` via Multer) salvos diretamente na nuvem utilizando integração (via Amazon S3 API SDK) com a nuvem **Backblaze B2**.
+
+📁 **Arquivo da rota:** `src/routes/uploadRoutes.js`
+📁 **Arquivo do controller:** `src/controllers/uploadController.js`
+
+---
+
+## C. Ter rota PUT que atualiza algum dado no BD
+
+**Descrição:** Foi criada a rota `PUT /estoque/:id` para permitir a atualização parcial de dados de um produto (ex: preço, quantidade) persistindo as alterações no banco de dados do Firestore.
+
+📁 **Arquivo:** `src/routes/estoqueRoutes.js`
+```js
+router.put('/estoque/:id', authMiddleware, estoqueController.atualizarItem);
+```
+
+---
+
+## D. Ter testes automatizados, usando JEST, para todas as rotas
+
+**Descrição:** A aplicação possui uma suíte robusta cobrindo as lógicas de todas as 12 rotas (Autenticação, CRUD, Upload, Distância e PDF), simulando ("mockando") as conexões de banco de dados e e-mail para execução rápida.
+
+📁 **Arquivo:** `tests/api.test.js`
+📁 **Comando para executar:** `npm test`
+
+---
+
+## E. Documentar a API no Readme.md
+
+**Descrição:** Este documento contém a documentação técnica relacionando os requisitos da N1A e N1B com o código-fonte produzido.
+
+---
+
+## F. Criptografar a senha do usuário no banco
+
+**Descrição:** As senhas dos usuários nunca são guardadas em texto plano. Ao povoar o banco via `seed.js` ou durante a autenticação, utiliza-se a biblioteca `bcryptjs` para aplicar *hashing* seguro.
+
+📁 **Arquivo:** `src/controllers/authController.js`
+```js
+const senhaValida = await bcrypt.compare(senha, usuario.senha);
+```
+
+---
+
+## G. Configurar o CORS, permitindo apenas requisição do mesmo servidor
+
+**Descrição:** O middleware de CORS foi configurado de forma estrita no servidor central para rejeitar origens não permitidas, restringindo o tráfego apenas à origem do host principal da aplicação.
+
+📁 **Arquivo:** `index.js`
+```js
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigin = process.env.HOST_URL || `http://localhost:${process.env.PORT || 3252}`;
+    if (!origin || origin === allowedOrigin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado pelo CORS: Origem não autorizada'));
+    }
+  }
+};
+app.use(cors(corsOptions));
+```
+
+---
+
+## H. Ter segundo fator de segurança, com código enviado por sms ou email
+
+**Descrição:** A rota de Autenticação foi estendida para um fluxo de "Dois Fatores" (2FA). Ao conferir a senha, um código de 6 dígitos é gerado e enviado para o **E-mail** do usuário (via pacote `Nodemailer`). O token JWT só é devolvido mediante validação desse código na etapa `/logar/2fa`.
+
+📁 **Arquivos:** `src/controllers/authController.js` e `src/config/mail.js`
+```js
+await sendEmail(email, 'Seu Código de Acesso', `Seu código de acesso para a API de Estoque é: ${codigo2fa}`);
+```
+
+---
+
+## I. Ter rota para calcular distância entre dois pontos em um mapa, através da informação das coordenadas geográficas
+
+**Descrição:** A rota matemática `POST /distancia` recebe as coordenadas de Latitude e Longitude do `pontoA` e `pontoB`. Ela converte graus em radianos e aplica a **Fórmula de Haversine** para devolver a distância exata em linha reta (em km) considerando a curvatura da terra.
+
+📁 **Arquivo:** `src/routes/mapaRoutes.js`
+📁 **Lógica em:** `src/controllers/mapaController.js`
+```js
+const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + ...
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+const distancia = R * c;
+```

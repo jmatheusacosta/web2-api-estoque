@@ -12,7 +12,18 @@ const logMiddleware = require('./src/middlewares/logMiddleware');
 
 const app = express();
 
-app.use(cors());
+// Configuração de CORS: Aceita requisições apenas do mesmo servidor (ou ferramenta sem Origin, como Postman)
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigin = process.env.HOST_URL || `http://localhost:${process.env.PORT || 3252}`;
+    if (!origin || origin === allowedOrigin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Bloqueado pelo CORS: Origem não autorizada'));
+    }
+  }
+};
+app.use(cors(corsOptions));
 
 // Middleware para interpretar JSON no body das requisições
 app.use(express.json());
