@@ -37,6 +37,16 @@ jest.mock('../src/config/b2', () => ({
   }
 }));
 
+jest.mock('../src/config/mail', () => ({
+  sendEmail: jest.fn().mockResolvedValue({})
+}));
+
+jest.mock('bcryptjs', () => ({
+  compare: jest.fn(async (senhaEnviada, hashSalvo) => {
+    return senhaEnviada === '123' && hashSalvo === 'hashed_123';
+  })
+}));
+
 // Load app AFTER mocks
 const app = require('../index');
 
@@ -58,20 +68,36 @@ describe('API de Estoque - Testes Automatizados', () => {
   });
 
   describe('Autenticação', () => {
-    it('POST /logar - Sucesso', async () => {
+    it('POST /logar - Sucesso deve enviar código sem devolver token', async () => {
       mockCollection.get.mockResolvedValueOnce({
         empty: false,
-        docs: [{ id: '1', data: () => ({ email: 'admin@loja.com' }) }]
+        docs: [{ id: '1', data: () => ({ email: 'admin@loja.com', senha: 'hashed_123' }) }]
       });
 
       const res = await request(app).post('/logar').send({ email: 'admin', senha: '123' });
+      expect(res.status).toBe(200);
+      expect(res.body.mensagem).toBe('Código de validação enviado para o e-mail informado');
+      expect(res.body).not.toHaveProperty('token');
+    });
+
+    it('POST /logar/2fa - Sucesso deve retornar JWT', async () => {
+      mockCollection.get.mockResolvedValueOnce({
+        empty: false,
+        docs: [{ id: '1', data: () => ({ email: 'admin@loja.com', codigo2fa: '123456', codigoExpira: Date.now() + 5000 }) }]
+      });
+
+      const res = await request(app).post('/logar/2fa').send({ email: 'admin@loja.com', codigo: '123456' });
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('token');
     });
 
     it('POST /logar - Falha', async () => {
-      mockCollection.get.mockResolvedValueOnce({ empty: true });
-      const res = await request(app).post('/logar').send({ email: 'errado', senha: '12' });
+      // Simulando falha por senha incorreta (email existe mas senha não bate)
+      mockCollection.get.mockResolvedValueOnce({
+        empty: false,
+        docs: [{ id: '1', data: () => ({ email: 'admin@loja.com', senha: 'hashed_123' }) }]
+      });
+      const res = await request(app).post('/logar').send({ email: 'admin@loja.com', senha: 'wrong' });
       expect(res.status).toBe(401);
     });
   });
@@ -130,6 +156,31 @@ describe('API de Estoque - Testes Automatizados', () => {
       const res = await request(app).get('/estoque/relatorio').set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toBe('application/pdf');
+    });
+  });
+
+  describe('Cálculo de Distância (Geolocalização)', () => {
+    it('POST /distancia - Deve calcular corretamente a distância entre Fortaleza e SP', async () => {
+      const res = await request(app)
+        .post('/distancia')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          pontoA: { lat: -3.7319, lon: -38.5267 }, // Fortaleza
+          pontoB: { lat: -23.5505, lon: -46.6333 } // São Paulo
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('distanciaKm');
+      expect(res.body.distanciaKm).toBeGreaterThan(2300);
+      expect(res.body.distanciaKm).toBeLessThan(2400);
+    });
+
+    it('POST /distancia - Deve rejeitar dados em branco ou inválidos', async () => {
+      const res = await request(app)
+        .post('/distancia')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ pontoA: { lat: -3.7 } }); 
+      expect(res.status).toBe(400);
     });
   });
 });

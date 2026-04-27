@@ -60,9 +60,16 @@
                 <div class="doc-card">
                     <span class="badge post">POST</span>
                     <h4>/logar</h4>
-                    <p>Obtem o token de acesso.</p>
+                    <p>Envia o código 2FA para o e-mail.</p>
                     <code id="code-logar">{"email": "admin@loja.com", "senha": "123"}</code>
                     <button class="fill-btn" onclick="fillForm('POST', '/logar', 'code-logar')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge post">POST</span>
+                    <h4>/logar/2fa</h4>
+                    <p>Valida o 2FA e recebe o token JWT.</p>
+                    <code id="code-logar-2fa">{"email": "admin@loja.com", "codigo": "123456"}</code>
+                    <button class="fill-btn" onclick="fillForm('POST', '/logar/2fa', 'code-logar-2fa')">Preencher</button>
                 </div>
                 <div class="doc-card">
                     <span class="badge get">GET</span>
@@ -118,6 +125,13 @@
                     <h4>/upload</h4>
                     <p>Envia uma imagem para a Nuvem B2.</p>
                     <button class="fill-btn" onclick="fillForm('POST', '/upload')">Preencher</button>
+                </div>
+                <div class="doc-card">
+                    <span class="badge post">POST</span>
+                    <h4>/distancia</h4>
+                    <p>Calcula distância em KM.</p>
+                    <code id="code-distancia">{"pontoA": {"lat": -3.7319, "lon": -38.5267}, "pontoB": {"lat": -23.5505, "lon": -46.6333}}</code>
+                    <button class="fill-btn" onclick="fillForm('POST', '/distancia', 'code-distancia')">Preencher</button>
                 </div>
             </div>
         </section>
